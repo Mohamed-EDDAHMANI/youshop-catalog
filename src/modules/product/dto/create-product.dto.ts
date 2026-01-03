@@ -13,7 +13,7 @@ export class CreateProductDto {
     price: number;
 
     @IsNumber()
-    quentity: number;
+    quentity?: number;
 
     @IsBoolean()
     isActive: boolean;

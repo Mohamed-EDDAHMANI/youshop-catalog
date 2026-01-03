@@ -5,4 +5,7 @@ export class CreateCategoryDto {
     @IsString()
     name: string;
 
+    @IsString()
+    description: string;
+
 }

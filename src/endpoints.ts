@@ -1,15 +1,15 @@
 // List of endpoints and allowed roles for catalog-service (Regex based)
 export const CATALOG_ENDPOINTS = [
   {
-    pattern: /^\/products\/post$/,
+    pattern: /^\/product\/create\/post$/,
     roles: ['admin'],
   },
   {
-    pattern: /^\/products\/[^\/]+\/put$/,
+    pattern: /^\/product\/update\/[^\/]+\/put$/,
     roles: ['admin'],
   },
   {
-    pattern: /^\/products\/[^\/]+\/delete$/,
+    pattern: /^\/product\/delete\/[^\/]+\/delete$/,
     roles: ['admin'],
   },
 ];

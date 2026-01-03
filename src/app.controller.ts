@@ -1,5 +1,4 @@
-import { Controller, Get, All, Res, HttpStatus } from '@nestjs/common';
-import express from 'express'
+import { Controller } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
@@ -19,8 +18,4 @@ export class AppController {
     };
   }
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
 }

@@ -1,35 +1,101 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Logger } from '@nestjs/common';
+import { ValidatedBody } from '../../common/decorators/validated-body.decorator';
+import { FilterProductDto } from './dto/filter-product.pdo';
+import { ServiceError } from '../../common/exceptions';
+import { CATALOG_PATTERNS } from '../../messaging';
+
 
 @Controller()
 export class ProductController {
+  private readonly logger = new Logger(ProductController.name);
+
   constructor(private readonly productService: ProductService) {}
 
-  @MessagePattern('createProduct')
-  create(@Payload() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @MessagePattern(CATALOG_PATTERNS.PRODUCT_CREATE)
+  async create(@ValidatedBody(CreateProductDto) createProductDto: CreateProductDto) {
+    this.logger.log(`Creating product: ${createProductDto.name}`);
+    const result = await this.productService.create(createProductDto);
+    
+    if (result instanceof ServiceError) {
+      throw new RpcException(result.toJSON());
+    }
+    
+    return result;
   }
 
-  @MessagePattern('findAllProduct')
-  findAll() {
-    return this.productService.findAll();
+  @MessagePattern(CATALOG_PATTERNS.PRODUCT_FIND_ALL)
+  async findAll() {
+    this.logger.log('Fetching all products');
+    const result = await this.productService.findAll();
+    
+    if (result instanceof ServiceError) {
+      throw new RpcException(result.toJSON());
+    }
+    
+    return result;
   }
 
-  @MessagePattern('findOneProduct')
-  findOne(@Payload() id: number) {
-    return this.productService.findOne(id);
+  @MessagePattern(CATALOG_PATTERNS.PRODUCT_FIND_ONE)
+  async findOne(@Payload() payload: any) {
+    const id = payload.params?.id || payload.id;
+    this.logger.log(`Fetching product: ${id}`);
+    
+    const result = await this.productService.findOne(id);
+    
+    if (result instanceof ServiceError) {
+      throw new RpcException(result.toJSON());
+    }
+    
+    return result;
   }
 
-  @MessagePattern('updateProduct')
-  update(@Payload() updateProductDto: UpdateProductDto) {
-    return this.productService.update(updateProductDto.id, updateProductDto);
+  @MessagePattern(CATALOG_PATTERNS.PRODUCT_UPDATE)
+  async update(
+    @Payload() payload: any,
+    @ValidatedBody(UpdateProductDto) updateDto: UpdateProductDto,
+  ) {
+    const id = payload.params?.id || payload.id;
+    this.logger.log(`Updating product: ${id}`);
+    
+    const result = await this.productService.update(id, updateDto);
+    
+    if (result instanceof ServiceError) {
+      throw new RpcException(result.toJSON());
+    }
+    
+    return result;
   }
 
-  @MessagePattern('removeProduct')
-  remove(@Payload() id: number) {
-    return this.productService.remove(id);
+  @MessagePattern(CATALOG_PATTERNS.PRODUCT_DELETE)
+  async delete(@Payload() payload: any) {
+    const id = payload.params?.id || payload.id;
+    const softDelete = payload.softDelete !== false;
+    
+    const result = await this.productService.delete(id, softDelete);
+    
+    if (result instanceof ServiceError) {
+      throw new RpcException(result.toJSON());
+    }
+    
+    return result;
+  }
+
+  @MessagePattern(CATALOG_PATTERNS.PRODUCT_FILTER)
+  async filter(@ValidatedBody(FilterProductDto) filterData: FilterProductDto) {
+    this.logger.log('Filtering products');
+    
+    const result = await this.productService.filter(filterData);
+    
+    if (result instanceof ServiceError) {
+      throw new RpcException(result.toJSON());
+    }
+    
+    return result;
   }
 }
+
