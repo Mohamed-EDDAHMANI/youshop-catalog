@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException, EventPattern } from '@nestjs/microservices';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -96,6 +96,25 @@ export class ProductController {
     }
     
     return result;
+  }
+
+  @EventPattern(CATALOG_PATTERNS.PRODUCT_DEACTIVATE)
+  async handleInventoryProductDeleted(@Payload() data: any) {
+    this.logger.log(`Received inventory product deletion event: ${JSON.stringify(data)}`);
+    
+    try {
+      // Deactivate the product based on SKU
+      const result = await this.productService.deactivateBySku(data.sku);
+      
+      if (result instanceof ServiceError) {
+        this.logger.error(`Failed to deactivate product with SKU ${data.sku}: ${result.message}`);
+        return;
+      }
+      
+      this.logger.log(`Product deactivated successfully for SKU: ${data.sku}`);
+    } catch (error) {
+      this.logger.error(`Error handling inventory product deleted event: ${error.message}`);
+    }
   }
 }
 

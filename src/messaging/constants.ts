@@ -10,6 +10,7 @@ export const CATALOG_PATTERNS = {
   PRODUCT_UPDATE: 'product/update',
   PRODUCT_DELETE: 'product/delete',
   PRODUCT_FILTER: 'product/filter',
+  PRODUCT_DEACTIVATE: 'product/deactivate',
   
   // Category patterns
   CATEGORY_CREATE: 'category/create',

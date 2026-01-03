@@ -627,4 +627,72 @@ export class ProductService {
       );
     }
   }
+
+  /**
+   * Deactivate product by SKU (called when inventory is deleted)
+   */
+  async deactivateBySku(sku: string): Promise<ApiResponse<any>> {
+    try {
+      if (!sku) {
+        throw new ServiceError(
+          'VALIDATION_ERROR',
+          'SKU is required',
+          400,
+          'catalog-service',
+          { field: 'sku' }
+        );
+      }
+
+      this.logger.log(`Deactivating product with SKU: ${sku}`);
+
+      // Find product by SKU
+      const product = await this.prisma.product.findFirst({
+        where: {
+          name: {
+            contains: sku,
+            mode: 'insensitive',
+          },
+        },
+      });
+
+      if (!product) {
+        return new ServiceError(
+          'NOT_FOUND',
+          `Product with SKU ${sku} not found`,
+          404,
+          'catalog-service',
+          { resource: 'Product', identifier: sku }
+        );
+      }
+
+      // Deactivate the product
+      const deactivated = await this.prisma.product.update({
+        where: { id: product.id },
+        data: {
+          isActive: false,
+        },
+      });
+
+      this.logger.log(`Product deactivated successfully: ${deactivated.id}`);
+
+      return {
+        success: true,
+        message: 'Product deactivated successfully due to inventory deletion',
+        data: deactivated,
+      };
+    } catch (error) {
+      if (error.code) {
+        return error;
+      }
+
+      this.logger.error(`Failed to deactivate product by SKU: ${error.message}`);
+      return new ServiceError(
+        'INTERNAL_SERVER_ERROR',
+        'Failed to deactivate product',
+        500,
+        'catalog-service'
+      );
+    }
+  }
 }
+
