@@ -5,6 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { throwError } from 'rxjs';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -18,9 +19,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception?.toJSON) {
       const errorResponse = exception.toJSON();
       this.logger.debug(`Throwing errorResponse:================= ${JSON.stringify(errorResponse)}`);
-      throw errorResponse; // Throw the plain object, not wrapped in RpcException
+      return throwError(() => new RpcException(errorResponse));
     }
     
-    throw new RpcException(exception);
+    return throwError(() => new RpcException(exception));
   }
 }

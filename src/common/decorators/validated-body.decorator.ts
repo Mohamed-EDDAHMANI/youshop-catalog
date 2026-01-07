@@ -11,10 +11,10 @@ export const ValidatedBody = (DtoClass: new () => any) =>
       if (!data?.body) {
         throw new ServiceError('VALIDATION_ERROR', 'Request body is missing', 400, 'catalog-service');
       }
-
+      
       const dto = plainToInstance(DtoClass, data.body);
       const errors = await validate(dto);
-
+      
       if (errors.length > 0) {
         const validationErrors: Record<string, string[]> = {};
         errors.forEach(error => {

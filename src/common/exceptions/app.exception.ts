@@ -1,4 +1,4 @@
-export class ServiceError {
+export class ServiceError extends Error {
   public readonly success: boolean;
   public readonly errorType: string;
   public readonly message: string;
@@ -14,6 +14,7 @@ export class ServiceError {
     serviceName: string = 'catalog-service',
     details?: any,
   ) {
+    super(message);
     this.success = false;
     this.errorType = errorType;
     this.message = message;

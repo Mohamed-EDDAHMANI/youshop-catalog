@@ -372,8 +372,7 @@ export class ProductService {
         );
       }
 
-      this.logger.log(`Fetching product: ${id}`);
-
+      
       // Step 1: Get product from database
       const product = await this.prisma.product.findUnique({
         where: { id },
@@ -381,7 +380,7 @@ export class ProductService {
           category: true,
         },
       });
-
+      
       if (!product) {
         return new ServiceError(
           'NOT_FOUND',
@@ -391,7 +390,6 @@ export class ProductService {
           { resource: 'Product', identifier: id }
         );
       }
-
       // Step 2: Get inventory data for this product
       const inventory = await this.fetchInventoryForProduct(product.id);
 

@@ -22,7 +22,7 @@ async function bootstrap() {
       host: '0.0.0.0',
       port: config.get<number>('TCP_PORT'),
     },
-  });
+  }, { inheritAppConfig: true });
 
   // 🔹 RabbitMQ (Service ↔ Service)
   app.connectMicroservice({
